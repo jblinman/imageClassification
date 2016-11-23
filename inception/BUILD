@@ -30,9 +30,9 @@ py_library(
 )
 
 py_library(
-    name = "flowers_data",
+    name = "ship_data",
     srcs = [
-        "flowers_data.py",
+        "ship_data.py",
     ],
     deps = [
         ":dataset",
@@ -70,12 +70,12 @@ py_binary(
 )
 
 py_binary(
-    name = "flowers_eval",
+    name = "ship_eval",
     srcs = [
-        "flowers_eval.py",
+        "ship_eval.py",
     ],
     deps = [
-        ":flowers_data",
+        ":ship_data",
         ":inception_eval",
     ],
 )
@@ -114,12 +114,12 @@ py_binary(
 )
 
 py_binary(
-    name = "flowers_train",
+    name = "ship_train",
     srcs = [
-        "flowers_train.py",
+        "ship_train.py",
     ],
     deps = [
-        ":flowers_data",
+        ":ship_data",
         ":inception_train",
     ],
 )
