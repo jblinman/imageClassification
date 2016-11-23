@@ -1,0 +1,85 @@
+## Instructions to fine tune Inception v3 model on new set of data
+
+Notes: 
+Right now, jpg and png images are supported
+Must use Python 2 (Bazel does not support Python 3)
+
+0. Pip install TensorFlow (TensorFlow MUST be pip installed) and Bazel
+
+1. Make a data folder with the following structure:
+  dataDir/train/Label0/myImage.jpg
+  dataDir/train/Label0/myImage2.jpg
+  dataDir/validation/Label0/myAwesomeImage.png
+  ...
+  dataDir/train/Label5/myImage.jpg
+  dataDir/validation/Label5/anotherImage.jpg
+  ...
+
+  where some of the image files are sorted under "train" and others under "validation"
+
+2. Make a label file in dataDir that contains a list of all possible labels each separated by a new line:
+  label0
+  label1
+  ...
+  label39
+
+3. Set $HERE to be the location of your dataDir:
+  $ export HERE=/home/jessica/imageClassification/data/ship_images_jpg/
+  or
+  $ export HERE=~/dataDir/
+
+4. Run build_image_data.py to make TFRecords shards:
+
+  $ python3 ~/imageClassification/utils/build_image_data.py --train_directory $HERE/train --validation_directory $HERE/validation --output_directory $HERE --train_shards 1 --validation_shards 1 --num_threads 1 --labels_file $HERE/labels.txt
+
+  where labels.txt is the list created in step 2
+
+5. Change the appropriate calls in flowers_train.py to make ship_train.py
+   Change the appropriate calls in flowers_eval.py to make ship_eval.py
+
+6. Change the appropriate calls in BUILD to build for ships rather than flowers
+
+7. Locate all of your important stuff for the training (substitute ships for flowers as necessary):
+  Where you want to save the newly fine-tuned model and checkpoints:
+    $ TRAIN_DIR=/home/jessica/imageClassification/flowers_model/
+
+  Location of dataDir from step 1:
+    $ FLOWERS_DATA_DIR=/home/jessica/imageClassification/data/flowers-data/raw-data/
+    $ SHIP_DATA_DIR=/home/jessica/imageClassification/data/ship_images_jpg/
+
+  Location of model checkpoint from which you would like to train (fine-tune):
+    $ MODEL_PATH=/home/jessica/imageClassification/inception-v3-model/inception-v3/m
+odel.ckpt-157585 
+
+8. Build ships_train.py in the folder in which it is contained:
+  $ bazel build ship_train
+
+9. Run the Bazel-built TensorFlow model from the folder that contains the bazel-bin file:
+  For flowers:
+  $ bazel-bin/inception/flowers_train --train_dir="${TRAIN_DIR}" --data_dir="${FLOWERS_DATA_DIR}" --pretrained_model_checkpoint_path="${MODEL_PATH}" --fine_tune=True --initial_learning_rate=0.001 --input_queue_memory_factor=1
+
+  For ship (use --max_steps for testing; default is 10000000):
+  $ bazel-bin/inception/ship_train --train_dir="${TRAIN_DIR}" --data_dir="${SHIP_DATA_DIR}" --pretrained_model_checkpoint_path="${MODEL_PATH}" --fine_tune=True --initial_learning_rate=0.001 --input_queue_memory_factor=1 --max_steps 205
+
+
+10. Evaluate trained model:
+  Bazel build eval:
+    $ bazel build ship_eval
+
+  Point to the directory that contians the newly fine-tuned checkpoints (from step 7)
+    $ TRAIN_DIR=/home/jessica/imageClassification/ship_model/
+
+  Point to the directory where you want to write event logs:
+    $ EVAL_DIR=/home/jessica/imageClassification/ship_model/eval
+
+  Evaluate the model:
+    $ bazel-bin/inception/ship_eval --eval_dir="${EVAL_DIR}" --data_dir="${SHIP_DATA_DIR}" --subset=validation --num_examples=9 --checkpoint_dir="${TRAIN_DIR}" --input_queue_memory_factor=1 --run_once
+
+A1. To view TensorBoard visualizations of training: (Use Chrome)
+  $ python2 -m tensorflow.tensorboard --logdir=events20161116/ --debug
+  $ python2 -m tensorflow.tensorboard --logdir=/home/jessica/imageClassification/ship_model/events20161116/
+
+
+  
+
+
