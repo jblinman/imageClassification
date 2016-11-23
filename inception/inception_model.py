@@ -19,6 +19,7 @@ The Inception v3 architecture is described in http://arxiv.org/abs/1512.00567
 Summary of available functions:
  inference: Compute inference on the model inputs to make a prediction
  loss: Compute the loss of the prediction with respect to the labels
+
 """
 from __future__ import absolute_import
 from __future__ import division

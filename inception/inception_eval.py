@@ -124,6 +124,7 @@ def _eval_once(saver, summary_writer, top_1_op, top_5_op, summary_op):
       summary.ParseFromString(sess.run(summary_op))
       summary.value.add(tag='Precision @ 1', simple_value=precision_at_1)
       summary.value.add(tag='Recall @ 5', simple_value=recall_at_5)
+      #summary.image.add(tag='Sample Image', image=)
       summary_writer.add_summary(summary, global_step)
 
     except Exception as e:  # pylint: disable=broad-except
@@ -138,6 +139,7 @@ def evaluate(dataset):
   with tf.Graph().as_default():
     # Get images and labels from the dataset.
     images, labels = image_processing.inputs(dataset)
+    print('\nGot the dataset\n')
 
     # Number of classes in the Dataset label set plus 1.
     # Label 0 is reserved for an (unused) background class.
@@ -146,6 +148,7 @@ def evaluate(dataset):
     # Build a Graph that computes the logits predictions from the
     # inference model.
     logits, _ = inception.inference(images, num_classes)
+    #print(logits)
 
     # Calculate predictions.
     top_1_op = tf.nn.in_top_k(logits, labels, 1)
@@ -164,6 +167,7 @@ def evaluate(dataset):
     summary_writer = tf.train.SummaryWriter(FLAGS.eval_dir,
                                             graph_def=graph_def)
 
+    print('\nEvaluate!\n')
     while True:
       _eval_once(saver, summary_writer, top_1_op, top_5_op, summary_op)
       if FLAGS.run_once:
