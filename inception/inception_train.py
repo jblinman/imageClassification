@@ -13,7 +13,6 @@
 # limitations under the License.
 # ==============================================================================
 """A library to train Inception using multiple GPU's with synchronous updates.
-
 """
 from __future__ import absolute_import
 from __future__ import division
